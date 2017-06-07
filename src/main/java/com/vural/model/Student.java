@@ -1,17 +1,19 @@
 package com.vural.model;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import lombok.ToString;
+import lombok.*;
+import org.json.JSONArray;
+import org.json.JSONObject;
 
 import javax.persistence.*;
-import java.util.List;
+import java.util.Set;
+
 
 /**
  * Created by vural on 05-Jun-17.
  */
 
+@Builder
+@EqualsAndHashCode
 @NoArgsConstructor
 @AllArgsConstructor
 @Data
@@ -20,15 +22,39 @@ public class Student {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "student_id")
     private Long id;
 
     private String firstName;
     private String lastName;
 
-    @JoinColumn(name = "student_id_in_lesson", referencedColumnName = "student_id")
-    @OneToMany(cascade = CascadeType.ALL)
-    private List<Lesson> lessonList;
 
+    @ManyToMany(cascade = CascadeType.ALL)
+    @JoinTable(name = "join_lesson_student",
+            joinColumns = {@JoinColumn(name = "lesson_id", referencedColumnName = "id")},
+            inverseJoinColumns = {@JoinColumn(name = "student_id", referencedColumnName = "id")}
+    )
+    private Set<Lesson> lessons;
+
+    @Override
+    public String toString() {
+        String info = "";
+        JSONObject jsonInfo = new JSONObject();
+        jsonInfo.put("id", this.id);
+        jsonInfo.put("first_name", this.firstName);
+        jsonInfo.put("last_name", this.lastName);
+
+        JSONArray subArray = new JSONArray();
+        this.lessons.forEach( lesson -> {
+            JSONObject subJson = new JSONObject();
+            subJson.put("lesson_id", lesson.getId());
+            subJson.put("lesson_name", lesson.getLessonName());
+            subJson.put("credit", lesson.getCredit());
+            subArray.put(subJson);
+        });
+
+        jsonInfo.put("lessons", subArray);
+        info = jsonInfo.toString();
+        return info;
+    }
 
 }

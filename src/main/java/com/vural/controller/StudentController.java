@@ -9,8 +9,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 /**
  * Created by vural on 05-Jun-17.
@@ -29,36 +28,42 @@ public class StudentController {
 
     @GetMapping(value = "/all")
     public List<Student> getAll() {
-        return studentRepository.findAll();
+        List<Student> studentList = studentRepository.findAll();
+        return studentList;
     }
 
     @GetMapping(value = "/create")
     public List<Student> create(){
-        List<Lesson> lessonList = new ArrayList<>();
 
-        Lesson lesson = new Lesson();
-        lesson.setLessonName("Computer Architecture");
-        lesson.setCredit(4);
-        lessonList.add(lesson);
+        Set<Lesson> lessonList = new HashSet<>();
 
-        Lesson lesson2 = new Lesson();
-        lesson2.setLessonName("Advanced Java");
-        lesson2.setCredit(3);
+        Lesson lesson1 = Lesson.builder()
+                .lessonName("Computer Architecture")
+                .credit(4)
+                .build();
+        lessonList.add(lesson1);
+
+        Lesson lesson2 = Lesson.builder()
+                .lessonName("Advanced Java")
+                .credit(3)
+                .build();
         lessonList.add(lesson2);
 
 
-        Student student = new Student();
-        student.setFirstName("Vural");
-        student.setLastName("Atici");
-        student.setLessonList(lessonList);
+        Student vural= Student.builder().firstName("Vural").lastName("Atici").lessons(lessonList).build();
+        Student ufuk= Student.builder().firstName("ufuk").lastName("Atici").lessons(lessonList).build();
 
-        studentRepository.save(student);
-        return studentRepository.findAll();
+        studentRepository.save(vural);
+        studentRepository.save(ufuk);
+
+        List<Student> studentList = studentRepository.findAll();
+        return studentList;
     }
 
     @GetMapping(value = "/delete/{id}")
     public List<Student> delete(@PathVariable Long id){
         studentRepository.deleteById(id);
-        return studentRepository.findAll();
+        List<Student> studentList = studentRepository.findAll();
+        return studentList;
     }
 }
